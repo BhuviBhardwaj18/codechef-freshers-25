@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Leaderboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a192f 0%, #172a45 100%);
+      color: #e6f1ff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      background: rgba(23, 42, 69, 0.9);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    header {
+      background: rgba(10, 25, 47, 0.9);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    h1 { color: #ffd43b; margin-bottom: 5px; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    th {
+      background: rgba(10,25,47,0.8);
+      color: #64b5f6;
+    }
+    tr:hover td { color: #ffd43b; }
+    .positive { color: #4cd97b; }
+    .negative { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>STUDENT LEADERBOARD</h1>
+    </header>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Student ID</th>
+          <th>Score</th>
+          <th>Time (s)</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let leaderboardData = [];
+
+    async function loadData() {
+      const response = await fetch("leaderboard.json");
+      leaderboardData = await response.json();
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const tbody = document.getElementById("leaderboard-body");
+      tbody.innerHTML = "";
+
+      leaderboardData.sort((a, b) => b.score - a.score);
+
+      leaderboardData.forEach((student, index) => {
+        const row = document.createElement("tr");
+        const scoreClass = student.score >= 0 ? "positive" : "negative";
+        row.innerHTML = `
+          <td>${index+1}</td>
+          <td>${student.id}</td>
+          <td class="${scoreClass}">${student.score.toFixed(1)}</td>
+          <td>${student.time_taken}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+
+    loadData();
+    setInterval(loadData, 5000);
+  </script>
+</body>
+</html>
