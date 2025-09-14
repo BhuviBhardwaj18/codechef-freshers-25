@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Leaderboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a192f 0%, #172a45 100%);
+      color: #e6f1ff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      background: rgba(23, 42, 69, 0.9);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    header {
+      background: rgba(10, 25, 47, 0.9);
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    h1 { color: #ffd43b; margin-bottom: 5px; }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
+      background: rgba(15,33,57,0.6);
+    }
+    button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      background: rgba(25,55,109,0.5);
+      color: #a8b2d1;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button:hover {
+      background: rgba(255,212,59,0.2);
+      color: #ffd43b;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    th {
+      background: rgba(10,25,47,0.8);
+      color: #64b5f6;
+      cursor: pointer;
+    }
+    tr:hover td { color: #ffd43b; }
+    .positive { color: #4cd97b; }
+    .negative { color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>STUDENT LEADERBOARD</h1>
+      <p>Live updates as students complete challenges</p>
+    </header>
+
+    <div class="controls">
+      <button id="sort-score"><i class="fas fa-sort-amount-down-alt"></i> Score</button>
+      <button id="sort-time"><i class="fas fa-stopwatch"></i> Time</button>
+      <button id="sort-id"><i class="fas fa-sort-numeric-down"></i> ID</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Student ID</th>
+          <th>Score</th>
+          <th>Time (s)</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    let leaderboardData = [];
+    let currentSort = { field: 'score', direction: 'desc' };
+
+    async function loadData() {
+      const response = await fetch("leaderboard.json"); // ensure this file is served by your server
+      leaderboardData = await response.json();
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const tbody = document.getElementById("leaderboard-body");
+      tbody.innerHTML = "";
+      sortData(currentSort.field, currentSort.direction);
+      leaderboardData.forEach((student, index) => {
+        const row = document.createElement("tr");
+        const scoreClass = student.score >= 0 ? "positive" : "negative";
+        row.innerHTML = `
+          <td>${index+1}</td>
+          <td>${student.id}</td>
+          <td class="${scoreClass}">${student.score.toFixed(1)}</td>
+          <td>${student.time_taken}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function sortData(field, direction) {
+      leaderboardData.sort((a, b) => {
+        let A = a[field], B = b[field];
+        if (field === "id") return direction === "asc" ? A.localeCompare(B) : B.localeCompare(A);
+        return direction === "asc" ? A - B : B - A;
+      });
+    }
+
+    function toggleSort(field, defaultDir) {
+      if (currentSort.field === field) {
+        currentSort.direction = currentSort.direction === "asc" ? "desc" : "asc";
+      } else {
+        currentSort.field = field;
+        currentSort.direction = defaultDir;
+      }
+      renderLeaderboard();
+    }
+
+    document.getElementById("sort-score").addEventListener("click", () => toggleSort("score", "desc"));
+    document.getElementById("sort-time").addEventListener("click", () => toggleSort("time_taken", "asc"));
+    document.getElementById("sort-id").addEventListener("click", () => toggleSort("id", "asc"));
+
+    loadData();
+  </script>
+</body>
+</html>
