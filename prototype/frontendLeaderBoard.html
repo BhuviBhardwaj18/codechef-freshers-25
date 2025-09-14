@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Leaderboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f4f9;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px 14px;
+      text-align: center;
+    }
+    th {
+      background: #2c3e50;
+      color: #fff;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+    tr:nth-child(even) {
+      background: #f9fbfd;
+    }
+    tr:hover {
+      background: #ecf3ff;
+    }
+    .positive {
+      color: #27ae60;
+      font-weight: bold;
+    }
+    .negative {
+      color: #c0392b;
+      font-weight: bold;
+    }
+    .rank {
+      font-weight: bold;
+      color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Student Leaderboard</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Student ID</th>
+        <th>Score</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-body">
+      <!-- Data will load here -->
+    </tbody>
+  </table>
+
+  <script>
+    async function loadLeaderboard() {
+      try {
+        const response = await fetch("leaderboard.json"); // fetch JSON file
+        const data = await response.json();
+
+        const tbody = document.getElementById("leaderboard-body");
+        tbody.innerHTML = "";
+
+        data.forEach((student, index) => {
+          const row = document.createElement("tr");
+
+          // choose green/red for score
+          const scoreClass = student.score >= 0 ? "positive" : "negative";
+
+          row.innerHTML = `
+            <td class="rank">${index + 1}</td>
+            <td>${student.id}</td>
+            <td class="${scoreClass}">${student.score}</td>
+            <td>${student.time_taken}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error("Error loading leaderboard:", error);
+      }
+    }
+
+    loadLeaderboard();
+  </script>
+</body>
+</html>
